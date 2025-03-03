@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
+#include <unistd.h>
 
 char getRowChar (int rowInt) {
     switch (rowInt)
@@ -99,20 +101,20 @@ int getRowInt (char rowLetter) {
 
 
 void drawField(int field [10][10]) {
-    for (int y = 0; y<=10; y++){
-        if (y!=0){
-            if (y<10) {
-                printf("0%d ", y);    
+    for (int x = 0; x<=10; x++){
+        if (x!=0){
+            if (x<10) {
+                printf("0%d ", x);    
             } else {
-                printf("%d ", y);
+                printf("%d ", x);
             }
-            //printf ("%c ", toupper(getRowChar(y)));
+            //printf ("%c ", toupper(getRowChar(x)));
         } else {
             printf (" #");
         }
 
-        for (int x = 0; x <10; x++) {
-            if (y!=0) {
+        for (int y = 0; y <10; y++) {
+            if (x!=0) {
 
                 switch (field[x][y])
                 {
@@ -132,10 +134,10 @@ void drawField(int field [10][10]) {
                     break;
                 }
             } else {
-                if (x+1<10) {
-                    printf("    0%d", x+1);    
+                if (y+1<10) {
+                    printf("    0%d", y+1);    
                 } else {
-                    printf("   %d ", x+1);
+                    printf("   %d ", y+1);
                 }
             }
         }
@@ -149,8 +151,8 @@ int fillBotField (int botField[10][10]) {
 }
 
 void initField (int field [10][10]) {
-    for (int y=0; y<10; y++) {
-        for (int x=0; x<10; x++) {
+    for (int x=0; x<10; x++) {
+        for (int y=0; y<10; y++) {
             field[x][y] = 0;
         }
     }
@@ -161,24 +163,70 @@ void debugField (int field[10][10]) {
         for (int x=0; x<10; x++) {
             printf("%d, ", field[x][y]);
         }
+        printf("\n");
     }
 }
 
+int isPlaceable() {
+    return 1;
+}
 
 void main () {
+    char choice;
     int playerField [10][10];
     int botField [10][10];
-
+    
     initField(playerField);
     initField(botField);
-    //1 porta-aviões (cinco quadrados), 2 navios-tanque (quatro quadrados), 3 contratorpedeiros (três quadrados) e 4 submarinos (dois quadrados)[1].
 
-    float awnser;
-    //printf("Bem vindo ao Batalha naval");
-    //printf("\n\t2 Fragatas\n");
     system("clear");
-    drawField(playerField);
 
+    //puts("=== Welcome to Battleship ===");
+//
+    //puts("\nIn this game you and your opponent have to place some ships in the ocean, they're:");
+    //puts("\n\t|  qt  |      type     |  size  |");
+    //puts("\n\t|  05  |   destroyers  |   02   |");
+    //puts("\t|  04  |   submarines  |   03   |");
+    //puts("\t|  03  |     cruiser   |   03   |");
+    //puts("\t|  02  |   battleship  |   04   |");
+    //puts("\t|  01  |     carrier   |   05   |");
+
+    //printf("\n\nStart game? (Y/N) ");
+    //scanf("%c", &choice);
+    //choice = tolower(choice);
+
+    //while (choice == 'y') {
+        int line;
+        int column;
+        int shipsPlaced = 0;
+
+        //system("clear");
+    //
+        //puts("Guess where your enemy's ships are. Choose wisely");
+        //puts("The game has begun");
+//
+        //sleep(5);
+        
+        while (shipsPlaced < 5){
+            system("clear");
+
+            debugField(playerField);
+            drawField(playerField);
+            puts("Choose the line (A - J): ");
+            scanf("%d", &line);
+            line=line-1;
+    
+            puts ("Choose the column (01 - 10): ");
+            scanf("%d", &column);
+            column= column -1;
+
+            if (isPlaceable() == 1) {
+                playerField [line][column] = 2;
+            }
+        }
+
+        choice = 'n';
+//    }
     //debugField(playerField);
     //debugField(botField);
 }
