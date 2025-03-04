@@ -99,24 +99,47 @@ int getRowInt (char rowLetter) {
     }
 }
 
+char *getShipName (char ship) {
+    switch (ship)
+    {
+    case 'd':
+        return "destroyier";
+        break;
+    case 's':
+        return "submarine";
+        break;
+    case 'r':
+        return "cruiser";
+        break;
+    case 'b':
+        return "battleship";
+        break;
+    case 'a':
+        return "carrier";
+        break;
+    default:
+        break;
+    }
+}
+
 
 void drawField(int field [10][10]) {
     for (int x = 0; x<=10; x++){
         if (x!=0){
-            if (x<10) {
-                printf("0%d ", x);    
-            } else {
-                printf("%d ", x);
-            }
-            //printf ("%c ", toupper(getRowChar(x)));
+            // if (x<10) {
+            //     printf("0%d ", x);    
+            // } else {
+            //     printf("%d ", x);
+            // }
+            printf ("%c ", toupper(getRowChar(x)));
         } else {
-            printf (" #");
+            printf ("#");
         }
 
         for (int y = 0; y <10; y++) {
             if (x!=0) {
 
-                switch (field[x][y])
+                switch (field[x-1][y])
                 {
                 case 0:
                     printf("  [~] ");
@@ -128,9 +151,6 @@ void drawField(int field [10][10]) {
 
                 case 2:
                     printf("  [#] ");
-
-                default:
-                    printf("  [~] ");
                     break;
                 }
             } else {
@@ -159,23 +179,191 @@ void initField (int field [10][10]) {
 }
 
 void debugField (int field[10][10]) {
-    for (int y=0; y<10; y++) {
-        for (int x=0; x<10; x++) {
+    for (int x=0; x<10; x++) {
+        for (int y=0; y<10; y++) {
             printf("%d, ", field[x][y]);
         }
         printf("\n");
     }
 }
 
-int isPlaceable() {
-    return 1;
+int getShipSize (char ship) {
+    switch (ship)
+    {
+    case 'd': return 2;
+        break;
+
+    case 's': return 3;
+        break;
+
+    case 'r': return 3;
+        break;
+
+    case 'b': return 4;
+        break;
+
+    case 'a': return 5;
+        break;
+
+    default: break;
+    }
+}
+
+int getShipQtd (char ship) {
+    switch (ship)
+    {
+    case 'd':
+        return 5;
+        break;
+
+    case 's':
+        return 4;
+        break;
+
+    case 'r':
+        return 3;
+        break;
+
+    case 'b':
+        return 2;
+        break;
+
+    case 'a':
+        return 1;
+        break;
+
+    default:
+        break;
+    }
+}
+
+int isPlaceable(int x, int y, int field[10][10], int size, char direction) {
+    int placeable = 0;
+    
+    for (int i=0; i<size; i++) {
+
+        if (direction == 'h' || direction == 0) {
+
+            if (field [x] [y+i] == 2 || y+i < 0 || y+i >= 10){
+                return 0;
+            } else {
+                placeable = 1;
+            }
+        } else if (direction == 'v'  || direction == 1) {
+            
+            if (field [x+i] [y] == 2 || x+i < 0 || x+i >=10){
+                return 0;
+            } else {
+                placeable = 1;
+            }
+        }
+    }
+
+    return placeable;
+}
+
+void placeUserShips (int field [10][10], char ship) {
+    int shipsPlaced = 0, line = 0, column = 0;
+    char direction, *shipName = getShipName(ship);
+
+    while (shipsPlaced < getShipQtd(ship)){
+        printf("Place the %s no%d. They occupie %d squares\n", shipName, shipsPlaced+1, getShipSize(ship));
+        drawField(field);
+        puts("Choose the line (A - J): ");
+        scanf("%d", &line);
+        line = line - 1;
+
+        puts ("Choose the column (01 - 10): ");
+        scanf("%d", &column);
+        column = column -1;
+
+        puts("Which direction does the ship go (V / H)?");
+        scanf(" %c", &direction);
+        direction = tolower(direction);
+
+        if (isPlaceable(line, column, field, getShipSize(ship), direction)) {
+            for (int i=0; i<getShipSize(ship); i++) {
+                switch (direction)
+                {
+                case 'h':
+                    field [line] [column+i] = 2;
+                    break;
+        
+                case 'v':
+                    field [line+i] [column] = 2;
+                    break;
+                }
+            }
+            shipsPlaced++;
+            system("clear");
+        } else {
+            system("clear");
+            puts("You cannot place a ship there!!!\n\n");
+            sleep(2);
+        }
+    }
+}
+
+void placeBotShips (int field [10][10]) {
+    int shipsPlaced = 0, x = 0, y = 0, direction = 0;
+    int c = 0;
+    char ship = 'd';
+
+    while (c<getShipQtd(ship)) {
+        shipsPlaced = 0;
+
+        printf("%d\n", c);
+
+        while (shipsPlaced < getShipQtd(ship)) {
+            
+            for (int i=0; i<getShipSize(ship); i++) {
+                x = rand() % 10;
+                y = rand() % 10;
+                direction = rand() % 2;
+                printf("%c: %d => (%d, %d)", ship, getShipQtd(ship), x, y);
+                
+                if (isPlaceable(x, y, field, getShipSize(ship), direction)) {
+                    shipsPlaced++;
+
+                    puts("Is Placeable");
+
+                    switch (direction)
+                    {
+                    case 0:
+                        if (field [x] [y+i] == 2 || y+i < 0 || y+i >= 10){
+                            field [x][y+i] = 2;
+                        }
+                        break;
+                    
+                    case 1:
+                        if (field [x+i][y] == 2|| x+i < 0 || x+i >= 10) {
+                            field [x+i] [y] = 2;
+                        }
+                        break;
+                    }
+                } else {
+                    printf("(%d, %d)", x, y);
+                    puts ("not placeable");
+                }
+            }
+        }
+        c++;
+        switch (c)
+        {
+        case 1: ship = 's'; break;
+        case 2: ship = 'r'; break; 
+        case 3: ship = 'b'; break;
+        case 4: ship = 'a'; break;
+        default: break;
+        }
+    }
 }
 
 void main () {
     char choice;
     int playerField [10][10];
     int botField [10][10];
-    
+
     initField(playerField);
     initField(botField);
 
@@ -196,9 +384,11 @@ void main () {
     //choice = tolower(choice);
 
     //while (choice == 'y') {
-        int line;
-        int column;
-        int shipsPlaced = 0;
+        // placeUserShips(playerField, 'd');
+        // placeUserShips(playerField, 's');
+        // placeUserShips(playerField, 'r');
+        // placeUserShips(playerField, 'b');
+        // placeUserShips(playerField, 'a');
 
         //system("clear");
     //
@@ -206,24 +396,9 @@ void main () {
         //puts("The game has begun");
 //
         //sleep(5);
-        
-        while (shipsPlaced < 5){
-            system("clear");
 
-            debugField(playerField);
-            drawField(playerField);
-            puts("Choose the line (A - J): ");
-            scanf("%d", &line);
-            line=line-1;
-    
-            puts ("Choose the column (01 - 10): ");
-            scanf("%d", &column);
-            column= column -1;
-
-            if (isPlaceable() == 1) {
-                playerField [line][column] = 2;
-            }
-        }
+        placeBotShips(botField);
+        drawField(botField);
 
         choice = 'n';
 //    }
