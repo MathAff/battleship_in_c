@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 char getRowChar (int rowInt) {
     switch (rowInt)
@@ -166,6 +167,84 @@ void drawField(int field [10][10]) {
     }
 }
 
+void drawBothField (int userField [10][10], int botField [10][10]) {
+    int newX=0, newY=0;
+
+    printf ("                          PLAYER FIELD                          |                          ENEMY FIELD\n");
+
+    for (int x = 0; x<=10; x++){
+        if (x!=0){
+            printf ("%c ", toupper(getRowChar(x)));
+        } else {
+            printf ("#");
+        }
+
+        for (int y = 0; y <= 20; y++) {
+            if (x!=0) {
+                if (y < 10) {
+                    switch (userField[x-1][y])
+                    {
+                    case 0:
+                        printf("  [~] ");
+                        break;
+                    
+                    case 1:
+                        printf("  [*] ");
+                        break;
+    
+                    case 2:
+                        printf("  [#] ");
+                        break;
+                    }
+                } else if (y == 10) {
+                    if (x == 0) {
+                        printf("  |  #");
+                    } else {
+                        printf("  |  %c ", getRowChar(x));
+                    }
+                                        
+                } else {
+                    switch (botField[x-2][y-1])
+                    {
+                    case 0:
+                        printf("  [~] ");
+                        break;
+                    
+                    case 2:
+                        printf("  [#] ");
+                        break;
+                    
+                    case 1:
+                        printf("  [*] ");
+                        break;
+                    }
+                }
+                
+            } else {
+                int columnToPrint = 0;
+
+                if (y<10) {
+                    columnToPrint = y+1;
+                } else {
+                    columnToPrint = (y-10)+1;
+                }
+                
+                if (columnToPrint<10) {
+                    printf("    0%d", columnToPrint);    
+                } else if (columnToPrint == 10) {
+                    printf("   %d ", columnToPrint);
+                }
+
+                if (y == 9) {
+                    printf("   |  #");
+                }
+            }
+        }
+        
+        printf("\n");
+    }
+}
+
 int fillBotField (int botField[10][10]) {
     return 0;
 }
@@ -309,42 +388,30 @@ void placeBotShips (int field [10][10]) {
     int c = 0;
     char ship = 'd';
 
-    while (c<getShipQtd(ship)) {
+    while (c<5) {
         shipsPlaced = 0;
 
-        printf("%d\n", c);
-
-        while (shipsPlaced < getShipQtd(ship)) {
+        while (shipsPlaced < getShipQtd(ship)){
+            x = rand() % 10;
+            y = rand() % 10;
+            direction = rand() % 2;
             
-            for (int i=0; i<getShipSize(ship); i++) {
-                x = rand() % 10;
-                y = rand() % 10;
-                direction = rand() % 2;
-                printf("%c: %d => (%d, %d)", ship, getShipQtd(ship), x, y);
-                
-                if (isPlaceable(x, y, field, getShipSize(ship), direction)) {
-                    shipsPlaced++;
-
-                    puts("Is Placeable");
-
+            if (isPlaceable(x, y, field, getShipSize(ship), direction)) {
+                for (int i=0; i<getShipSize(ship); i++) {
                     switch (direction)
                     {
                     case 0:
-                        if (field [x] [y+i] == 2 || y+i < 0 || y+i >= 10){
-                            field [x][y+i] = 2;
-                        }
+                        field [x] [y+i] = 2;
                         break;
-                    
+            
                     case 1:
-                        if (field [x+i][y] == 2|| x+i < 0 || x+i >= 10) {
-                            field [x+i] [y] = 2;
-                        }
+                        field [x+i] [y] = 2;
                         break;
                     }
-                } else {
-                    printf("(%d, %d)", x, y);
-                    puts ("not placeable");
                 }
+                shipsPlaced++;
+            } else {
+                
             }
         }
         c++;
@@ -364,6 +431,8 @@ void main () {
     int playerField [10][10];
     int botField [10][10];
 
+    srand(time(NULL));
+
     initField(playerField);
     initField(botField);
 
@@ -371,25 +440,19 @@ void main () {
 
     //puts("=== Welcome to Battleship ===");
 //
-    //puts("\nIn this game you and your opponent have to place some ships in the ocean, they're:");
-    //puts("\n\t|  qt  |      type     |  size  |");
-    //puts("\n\t|  05  |   destroyers  |   02   |");
-    //puts("\t|  04  |   submarines  |   03   |");
-    //puts("\t|  03  |     cruiser   |   03   |");
-    //puts("\t|  02  |   battleship  |   04   |");
-    //puts("\t|  01  |     carrier   |   05   |");
+    // puts("\nIn this game you and your opponent have to place some ships in the ocean, they're:");
+    // puts("\n\t|  qt  |      type     |  size  |");
+    // puts("\n\t|  05  |   destroyers  |   02   |");
+    // puts("\t|  04  |   submarines  |   03   |");
+    // puts("\t|  03  |     cruiser   |   03   |");
+    // puts("\t|  02  |   battleship  |   04   |");
+    // puts("\t|  01  |     carrier   |   05   |");
 
     //printf("\n\nStart game? (Y/N) ");
     //scanf("%c", &choice);
     //choice = tolower(choice);
 
-    //while (choice == 'y') {
-        // placeUserShips(playerField, 'd');
-        // placeUserShips(playerField, 's');
-        // placeUserShips(playerField, 'r');
-        // placeUserShips(playerField, 'b');
-        // placeUserShips(playerField, 'a');
-
+    //while (choice == 'y') 
         //system("clear");
     //
         //puts("Guess where your enemy's ships are. Choose wisely");
@@ -397,8 +460,14 @@ void main () {
 //
         //sleep(5);
 
-        placeBotShips(botField);
-        drawField(botField);
+        // placeUserShips(playerField, 'd');
+        // placeUserShips(playerField, 's');
+        // placeUserShips(playerField, 'r');
+        // placeUserShips(playerField, 'b');
+        // placeUserShips(playerField, 'a');
+
+        drawBothField(playerField, botField);
+        
 
         choice = 'n';
 //    }
