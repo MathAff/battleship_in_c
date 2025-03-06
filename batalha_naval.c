@@ -153,6 +153,14 @@ void drawField(int field [10][10]) {
                 case 2:
                     printf("  [#] ");
                     break;
+
+                case 3:
+                    printf("  [x] ");
+                    break;
+
+                default:
+                    printf("  [~] ");
+                    break;
                 }
             } else {
                 if (y+1<10) {
@@ -195,6 +203,14 @@ void drawBothField (int userField [10][10], int botField [10][10]) {
                     case 2:
                         printf("  [#] ");
                         break;
+
+                    case 3:
+                        printf("  [x] ");
+                        break;
+
+                    default:
+                        printf("  [~] ");
+                        break;
                     }
                 } else if (y == 10) {
                     if (x == 0) {
@@ -210,12 +226,20 @@ void drawBothField (int userField [10][10], int botField [10][10]) {
                         printf("  [~] ");
                         break;
                     
+                    case 1:
+                        printf("  [*] ");
+                        break;
+                    
                     case 2:
                         printf("  [#] ");
                         break;
-                    
-                    case 1:
-                        printf("  [*] ");
+
+                    case 3:
+                        printf("  [x] ");
+                        break;
+
+                    default:
+                        printf("  [~] ");
                         break;
                     }
                 }
@@ -374,9 +398,9 @@ void placeUserShips (int field [10][10], char ship) {
                 }
             }
             shipsPlaced++;
-            system("clear");
+            printf("\033[H\033[J");
         } else {
-            system("clear");
+            printf("\033[H\033[J");
             puts("You cannot place a ship there!!!\n\n");
             sleep(2);
         }
@@ -426,17 +450,59 @@ void placeBotShips (int field [10][10]) {
     }
 }
 
+int shootAtField (int field [10][10], int x, int y) {
+    if (field[x][y] == 0) {
+        return 0;
+    } else if (field[x][y] == 1) {
+        return 1;
+    } else {
+        return 2;
+    }
+}
+
+void animateCoin(int height) {
+    char *frames[] = {"-", "\\", "|", "/"};
+    int frameCount = 4;
+
+    printf("\033[?25l");
+
+    // Subindo
+    for (int i = height; i >= 0; i--) {
+        system("clear");
+        for (int j = 0; j < i; j++) {
+            printf("\n");
+        }
+        printf("%s\n", frames[(height - i) % frameCount]);
+        usleep(200000);  // Espera 200ms
+    }
+
+    // Descendo
+    for (int i = 1; i <= height; i++) {
+        system("clear");
+        for (int j = 0; j < i; j++) {
+            printf("\n");
+        }
+        printf("%s\n", frames[(height - i) % frameCount]);
+        usleep(200000);  // Espera 200ms
+    }
+
+    printf("\033[?25h");
+
+}
+
+
 void main () {
     char choice;
     int playerField [10][10];
     int botField [10][10];
+    int userTurn = 1, line, column;
 
     srand(time(NULL));
 
     initField(playerField);
     initField(botField);
 
-    system("clear");
+    printf("\033[H\033[J");
 
     //puts("=== Welcome to Battleship ===");
 //
@@ -453,7 +519,7 @@ void main () {
     //choice = tolower(choice);
 
     //while (choice == 'y') 
-        //system("clear");
+        //printf("\033[H\033[J");
     //
         //puts("Guess where your enemy's ships are. Choose wisely");
         //puts("The game has begun");
@@ -466,11 +532,56 @@ void main () {
         // placeUserShips(playerField, 'b');
         // placeUserShips(playerField, 'a');
 
-        drawBothField(playerField, botField);
+        int flipCoin = rand() % 2;
+        userTurn = flipCoin == 0 ? 0 : 1;
         
+        puts("Who goes first? Fliping a coin...");
+        sleep(2.5);
+        printf("\033[H\033[J");
+
+        animateCoin(5);
+
+        switch (userTurn)
+        {
+        case 0:
+            printf("  Bot goes first!!\n");
+            break;
+        
+        case 1:
+            printf("  You go first!!\n");
+            break;
+        
+        default:
+            break;
+        }
+
+        sleep(4);
+
+        while (userTurn) {
+            puts("Where are the enemy's ships?");
+            puts("Choose line (A - Z)");
+            scanf("%d", &line);
+            line--;
+
+            puts("Choose column (01 - 10)");
+            scanf("%d", &column);
+            column--;
+
+            if (botField [line][column] == 0) {
+                userTurn = 0;
+            } else if (botField[line][column] == 1 || botField [line][column] == 3) {
+                puts("You already guessed that");
+            } else {
+
+            }
+        }
+
+        while () {
+
+        }
+        
+
 
         choice = 'n';
 //    }
-    //debugField(playerField);
-    //debugField(botField);
 }
