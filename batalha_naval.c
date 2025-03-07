@@ -177,69 +177,72 @@ void drawField(int field [10][10]) {
 
 void drawBothField (int userField [10][10], int botField [10][10]) {
     int newX=0, newY=0;
+    printf("\033[1m");
 
     printf ("                          PLAYER FIELD                          |                          ENEMY FIELD\n");
 
     for (int x = 0; x<=10; x++){
         if (x!=0){
-            printf ("%c ", toupper(getRowChar(x)));
+            printf ("\033[1m%c ", toupper(getRowChar(x)));
         } else {
             printf ("#");
         }
 
         for (int y = 0; y <= 20; y++) {
+            printf("\033[0m");
             if (x!=0) {
                 if (y < 10) {
-                    switch (userField[x-1][y])
+                    switch (botField[x-2][y-1])
                     {
                     case 0:
-                        printf("  [~] ");
+                        printf("\033[34m  [~] ");
                         break;
                     
                     case 1:
-                        printf("  [*] ");
+                        printf("\033[31m  [*] ");
                         break;
-    
+                    
                     case 2:
-                        printf("  [#] ");
+                        printf("\033[32m  [#] ");;
                         break;
 
                     case 3:
-                        printf("  [x] ");
+                        printf("\033[33m  [x] ");
                         break;
 
                     default:
-                        printf("  [~] ");
+                        printf("\033[34m  [~] ");
                         break;
                     }
+                    printf("\033[0m");
                 } else if (y == 10) {
                     if (x == 0) {
                         printf("  |  #");
                     } else {
-                        printf("  |  %c ", getRowChar(x));
+                        printf("\033[1m  |  %c ", getRowChar(x));
                     }
                                         
                 } else {
                     switch (botField[x-2][y-1])
                     {
                     case 0:
-                        printf("  [~] ");
+                        printf("\033[34m  [~] \033[0m");
                         break;
                     
                     case 1:
-                        printf("  [*] ");
+                        printf("\033[31m  [*] \033[0m");
                         break;
                     
                     case 2:
-                        printf("  [#] ");
+                        printf("\033[32m  [#] \033[0m");;
                         break;
 
                     case 3:
-                        printf("  [x] ");
+                        printf("\033[33m  [x] \033[0m");
                         break;
 
                     default:
-                        printf("  [~] ");
+                        printf("\033[34m  [~] \033[0m");
                         break;
                     }
                 }
@@ -254,13 +257,13 @@ void drawBothField (int userField [10][10], int botField [10][10]) {
                 }
                 
                 if (columnToPrint<10) {
-                    printf("    0%d", columnToPrint);    
+                    printf("\033[1m    0%d", columnToPrint);    
                 } else if (columnToPrint == 10) {
-                    printf("   %d ", columnToPrint);
+                    printf("\033[1m   %d ", columnToPrint);
                 }
 
                 if (y == 9) {
-                    printf("   |  #");
+                    printf("\033[1m   |  #");
                 }
             }
         }
@@ -268,7 +271,7 @@ void drawBothField (int userField [10][10], int botField [10][10]) {
         printf("\n");
     }
 
-    puts("\n[~] - Water    |  [#] - Ship\n[x] Hit Water  |  [*] - Hit Ship");
+    puts("\033[1m\n[~] -   Water    |  [#] -   Ship\n[x] - Hit Water  |  [*] - Hit Ship\033[0m");
 }
 
 int fillBotField (int botField[10][10]) {
@@ -493,6 +496,71 @@ void animateCoin(int height) {
 
 }
 
+int playerTurn (int playerField[10][10], int botField [10][10]) {
+    int userTurn = 0, line=0, column=0;
+
+    puts("\nWhere are the enemy's ships?");
+    puts("Choose line (A - J)");
+    scanf("%d", &line);
+    line--;
+
+    puts("Choose column (01 - 10)");
+    scanf("%d", &column);
+    column--;
+
+    if (botField [line][column] == 0) {
+        botField[line][column] = 3;
+        system("clear");
+        puts("You hit water T_T");
+        sleep(2);
+        system("clear");
+        userTurn = 0;
+    } else if (botField[line][column] == 1 || botField [line][column] == 3) {
+        puts("You already guessed that");
+    } else {
+        botField[line][column]=1;
+        system("clear");
+        puts("You get it right!!!");
+        sleep(2);
+        system("clear");
+        userTurn = 1;
+    }
+
+    return userTurn;
+}
+
+int botTurn (int playerField [10][10], int botField[10][10]) {
+    int line, column;
+    int botTurn = 1;
+
+    system("clear");
+    puts("It's enemy's turn!!!\n");
+
+    line = rand()%10;
+    column = rand()%10;
+
+    printf("%d", playerField[line][column]);
+
+    
+    if (playerField [line][column] == 0) {
+        playerField[line][column] = 3;
+        drawBothField(playerField, botField);
+        
+        printf("%d\nBot guessed: (%d, %d)", playerField[line][column], line+1, column+1);
+        puts(" and hit water =D");
+        botTurn = 0;
+    } else if (playerField [line][column] == 2) {
+
+        playerField[line][column]=1;
+        drawBothField(playerField, botField);
+
+        printf("%d\nBot guessed: (%d, %d)", playerField[line][column], line+1, column+1);
+        puts(" and hit your ship T_T");
+
+    }
+    return botTurn;
+}
+
 
 void main () {
     char choice;
@@ -569,89 +637,28 @@ void main () {
 
         system("clear");
 
-        while (playerGuesses < 44 || botGuesses < 44){
-            if (playerGuesses == 44 ) {
-                puts("You lose '-'");
-                break;
-            } else if (botGuesses == 44) {
-                puts("You won xD");
-                break;
-            }
-
-            while (userTurn) {
-                system("clear");
-
-                puts("It's your turn!!!\n");
+        int gameRunning = 1;
+        while (gameRunning == 1){
+            while (userTurn == 1) {
                 drawBothField(playerField, botField);
-
-                puts("\nWhere are the enemy's ships?");
-                puts("Choose line (A - J)");
-                scanf("%d", &line);
-                line--;
-    
-                puts("Choose column (01 - 10)");
-                scanf("%d", &column);
-                column--;
-    
-                if (botField [line][column] == 0) {
-                    botField[line][column] = 3;
-                    userTurn = 0;
-                } else if (botField[line][column] == 1 || botField [line][column] == 3) {
-                    puts("You already guessed that");
-                    
-                    printf("Press Enter to Continue ");
-                    while( getchar() != '\n' );
-                    
-                } else {
-                    botField[line][column]=1;
-                    system("clear");
-                    puts("You get it right!!!");
-                    sleep(2);
-                    userTurn = 1;
-                    playerGuesses++;
-                }
+                userTurn = playerTurn(playerField, botField);
             }
     
-            while (!userTurn) {
-                puts("It's enemy's turn!!!\n");
-    
-                line = rand()%10;
-                column = rand()%10;
-
-                
-                if (playerField [line][column] == 0) {
-                    playerField[line][column] = 3;
-                    drawBothField(playerField, botField);
-                    
-                    printf("\nBot guessed: (%d, %d)", line+1, column+1);
-                    puts(" and hit water =D");
-                    userTurn = 1;
-                } else if (playerField[line][column] == 1 || playerField [line][column] == 3) {
-
-                    puts("You already guessed that");
-
-                } else {
-
-                    playerField[line][column]=1;
-                    drawBothField(playerField, botField);
-
-                    printf("\nBot guessed: (%d, %d)", line+1, column+1);
-                    puts(" and hit your ship T_T");
-
-                    userTurn = 0;
-                    botGuesses++;
-                }
+            while (userTurn == 0) {
+                userTurn = !botTurn(playerField, botField);
 
                 printf("Press Enter to Continue ");
-                while( getchar() != '\n' );
-                system("clear");
+                while (getchar() != '\n');
             }
             
+            if (botGuesses == 4 ) {
+                puts("You lose '-'");
+                gameRunning = 0;
+            } else if (playerGuesses == 4) {
+                puts("You won xD");
+                gameRunning = 0;
+            }
         }
-        
-
-        
-
 
         choice = 'n';
 //    }
