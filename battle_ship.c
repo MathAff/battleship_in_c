@@ -506,7 +506,7 @@ int playerTurn (int playerField[10][10], int botField [10][10]) {
 
     printf("\nWhere are the enemy's ships?\n");
     puts("Choose line (A - J)");
-    scanf("%c", &lineChar);
+    scanf(" %c", &lineChar);
     line = getRowInt(lineChar);
 
     puts("Choose column (01 - 10)");
@@ -655,6 +655,12 @@ void main () {
                 if (userTurn) {
                     playerGuesses++;
                 }
+                
+                if (playerGuesses == 4) {
+                    puts("You won xD");
+                    gameRunning = 0;
+                    break;
+                }
             }
     
             while (!userTurn) {
@@ -667,16 +673,13 @@ void main () {
 
                 if (!userTurn) {
                     botGuesses++;
-                    printf("bot tem: %d", botGuesses);
                 }
-            }
-            
-            if (botGuesses == 4 ) {
-                puts("You lose '-'");
-                gameRunning = 0;
-            } else if (playerGuesses == 4) {
-                puts("You won xD");
-                gameRunning = 0;
+
+                if (botGuesses == 4) {
+                    puts ("You Lose");
+                    gameRunning = 0;
+                    break;
+                }
             }
             c++;
         }
