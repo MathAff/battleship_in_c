@@ -486,13 +486,43 @@ void printScoreBoard(int playerScore, int botScore) {
     printf (" |\n\n\033[0m");
 }
 
-void animateBotThinking () {
+void printBotThinking () {
     int frameCount = 4;
 
-    printf ("\033[?25l\033[1m");
-    printf ("Bot Is Placing Ships");
+    printf ("\033[?25l\033[1m"); // unable cursor
 
-    printf("\n");
+    printf ("Bot Is Guessing Where Are Your Ships...");
+    sleep(2);
+
+    clearScreen();
+
+    printf("\033[?25h\n"); // enable cursor
+}
+
+void printYouLose () {
+    printf("      _____      _____        _____     ____   ____        ____                _____             ______       ______   \n");
+    printf("     |\\    \\    /    /|  ____|\\    \\   |    | |    |      |    |          ____|\\    \\        ___|\\     \\  ___|\\     \\  \n");
+    printf("     | \\    \\  /    / | /     /\\    \\  |    | |    |      |    |         /     /\\    \\      |    |\\     \\|     \\     \\ \n");
+    printf("     |  \\____\\/    /  //     /  \\    \\ |    | |    |      |    |        /     /  \\    \\     |    |/____/||     ,_____/|\n");
+    printf("      \\ |    /    /  /|     |    |    ||    | |    |      |    |  ____ |     |    |    | ___|    \\|   | ||     \\--'\\_|/\n");
+    printf("       \\|___/    /  / |     |    |    ||    | |    |      |    | |    ||     |    |    ||    \\    \\___|/ |     /___/|  \n");
+    printf("           /    /  /  |\\     \\  /    /||    | |    |      |    | |    ||\\     \\  /    /||    |\\     \\    |     \\____|\\ \n");
+    printf("          /____/  /   | \\_____\\/____/ ||\\___\\_|____|      |____|/____/|| \\_____\\/____/ ||\\ ___\\|_____|   |____ '     /|\n");
+    printf("         |`    | /     \\ |    ||    | /| |    |    |      |    |     || \\ |    ||    | /| |    |     |   |    /_____/ |\n");
+    printf("         |_____|/       \\|____||____|/  \\|____|____|      |____|_____|/  \\|____||____|/  \\|____|_____|   |____|     | /\n");
+}
+
+void printYouWon () {
+    printf(" _____      _____        _____     ____   ____         _____                   _____  _____   ______   \n");
+    printf(" |\\    \\    /    /|  ____|\\    \\   |    | |    |       |\\    \\   _____     ____|\\    \\|\\    \\ |\\     \\  \n");
+    printf(" | \\    \\  /    / | /     /\\    \\  |    | |    |       | |    | /    /|   /     /\\    \\\\\\    \\| \\     \\ \n");
+    printf(" |  \\____\\/    /  //     /  \\    \\ |    | |    |       \\/     / |    ||  /     /  \\    \\\\|    \\  \\     |\n");
+    printf("  \\ |    /    /  /|     |    |    ||    | |    |       /     /_  \\   \\/ |     |    |    ||     \\  |    |\n");
+    printf("   \\|___/    /  / |     |    |    ||    | |    |      |     // \\  \\   \\ |     |    |    ||      \\ |    |\n");
+    printf("       /    /  /  |\\     \\  /    /||    | |    |      |    |/   \\ |    ||\\     \\  /    /||    |\\ \\|    |\n");
+    printf("      /____/  /   | \\_____\\/____/ ||\\___\\_|____|      |\\ ___/\\   \\|   /|| \\_____\\/____/ ||____||\\_____/|\n");
+    printf("     |`    | /     \\ |    ||    | /| |    |    |      | |   | \\______/ | \\ |    ||    | /|    |/ \\|   ||\n");
+    printf("     |_____|/       \\|____||____|/  \\|____|____|       \\|___|/\\ |    | |  \\|____||____|/ |____|   |___|/\n");
 }
 
 void animateCoin(int height) {
@@ -502,14 +532,13 @@ void animateCoin(int height) {
     printf("\033[33;1m"); // change color to yellow
     printf("\033[?25l"); // unable cursor
 
-    // Subindo
     for (int i = height; i >= 0; i--) {
         clearScreen();
         for (int j = 0; j < i; j++) {
             printf("\n");
         }
         printf("%s\n", frames[(height - i) % frameCount]);
-        usleep(200000);
+        usleep(20000);
     }
 
     for (int i = 1; i <= height; i++) {
@@ -521,7 +550,7 @@ void animateCoin(int height) {
         usleep(200000);
     }
 
-    printf("\033[?25h"); // "turn on" cursor
+    printf("\033[?25h"); // enable cursor
     printf("\033[0m"); // reset text style
 
 }
@@ -529,8 +558,6 @@ void animateCoin(int height) {
 int playerTurn (int playerField[10][10], int botField [10][10]) {
     int userTurn = 1, line=0, column=0;
     char lineChar;
-
-    puts("It's your turn");
 
     printf("\nWhere are the enemy's ships?\n");
     puts("Choose line (A - J)");
@@ -555,7 +582,7 @@ int playerTurn (int playerField[10][10], int botField [10][10]) {
     } else {
         botField[line][column]=1;
         clearScreen();
-        puts("You get it right!!!");
+        puts("You got it right!!!");
         sleep(2);
         clearScreen();
         userTurn = 1;
@@ -567,10 +594,6 @@ int playerTurn (int playerField[10][10], int botField [10][10]) {
 int botTurn (int playerField [10][10], int botField[10][10]) {
     int line, column;
     int botTurn = 1;
-
-    puts("It's enemy's turn!!!\n");
-
-    animateBotThinking();
 
     line = rand()%10;
     column = rand()%10;
@@ -654,9 +677,9 @@ void main () {
 
         // animateCoin(5);
         
-        // int flipCoin = rand() % 2;
-        // userTurn = flipCoin == 0 ? 0 : 1;
-        userTurn = 0;
+        int flipCoin = rand() % 2;
+        userTurn = flipCoin == 0 ? 0 : 1;
+        // userTurn = 0;
 
         // switch (userTurn)
         // {
@@ -672,17 +695,19 @@ void main () {
         //     break;
         // }
 
-        // sleep(4);
+        // sleep(2);
 
         clearScreen();
 
         int gameRunning = 1, c=1;
         while (gameRunning){
-            printf("Turn no%d\n", c);
-
-            printScoreBoard(playerGuesses, botGuesses);
+            clearScreen();
+            printf("Turn no%d\n\n", c);
 
             while (userTurn) {
+                puts("It's Your Turn ");
+
+                printScoreBoard(playerGuesses, botGuesses);
 
                 drawBothField(playerField, botField);
                 userTurn = playerTurn(playerField, botField);
@@ -691,13 +716,17 @@ void main () {
                 }
                 
                 if (playerGuesses == 4) {
-                    puts("You won xD");
+                    printYouWon();
                     gameRunning = 0;
                     break;
                 }
             }
     
             while (!userTurn) {
+                clearScreen();
+                puts("It's enemys turn\n");
+
+                printScoreBoard(playerGuesses, botGuesses);
 
                 userTurn = !botTurn(playerField, botField);
                 char input[100];
@@ -710,7 +739,7 @@ void main () {
                 }
 
                 if (botGuesses == 4) {
-                    puts ("You Lose");
+                    printYouLose();
                     gameRunning = 0;
                     break;
                 }
