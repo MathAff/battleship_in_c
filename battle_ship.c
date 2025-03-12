@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <time.h>
 
+void pressEnterToContinue();
+
 void clearScreen() {
     printf("\033[H\033[J");
 }
@@ -469,6 +471,30 @@ int shootAtField (int field [10][10], int x, int y) {
     }
 }
 
+void printScoreBoard(int playerScore, int botScore) {
+    printf("\n\033[1m|");
+    if (playerScore == botScore) {
+
+        printf(" Your Score: %d | Enemy Score: %d", playerScore, botScore);
+
+    } else if (playerScore < botScore) {
+
+        printf("\033[31m Your Score: %d \033[0;1m| \033[32mEnemy Score: %d \033[0m", playerScore, botScore);
+    } else {
+        printf("\033[32m Your Score: %d \033[0;1m| \033[31mEnemy Score: %d \033[0m", playerScore, botScore);
+    }
+    printf (" |\n\n\033[0m");
+}
+
+void animateBotThinking () {
+    int frameCount = 4;
+
+    printf ("\033[?25l\033[1m");
+    printf ("Bot Is Placing Ships");
+
+    printf("\n");
+}
+
 void animateCoin(int height) {
     char *frames[] = {"-", "\\", "|", "/"};
     int frameCount = 4;
@@ -504,6 +530,8 @@ int playerTurn (int playerField[10][10], int botField [10][10]) {
     int userTurn = 1, line=0, column=0;
     char lineChar;
 
+    puts("It's your turn");
+
     printf("\nWhere are the enemy's ships?\n");
     puts("Choose line (A - J)");
     scanf(" %c", &lineChar);
@@ -515,10 +543,12 @@ int playerTurn (int playerField[10][10], int botField [10][10]) {
 
     if (botField [line][column] == 0) {
         botField[line][column] = 3;
+
         clearScreen();
         puts("You hit water T_T");
         sleep(2);
         clearScreen();
+
         userTurn = 0;
     } else if (botField[line][column] == 1 || botField [line][column] == 3) {
         puts("You already guessed that");
@@ -538,8 +568,9 @@ int botTurn (int playerField [10][10], int botField[10][10]) {
     int line, column;
     int botTurn = 1;
 
-    clearScreen();
     puts("It's enemy's turn!!!\n");
+
+    animateBotThinking();
 
     line = rand()%10;
     column = rand()%10;
@@ -565,9 +596,10 @@ int botTurn (int playerField [10][10], int botField[10][10]) {
 }
 
 void pressEnterToContinue () {
+    while (getchar() != '\n');
+
     printf("Press Enter to Continue...\n");
-    scanf("%*[^\n]"); // Ignora tudo até encontrar uma nova linha
-    getchar(); // Remove o '\n' do buffer
+    getchar();
 }
 
 
@@ -647,6 +679,8 @@ void main () {
         int gameRunning = 1, c=1;
         while (gameRunning){
             printf("Turn no%d\n", c);
+
+            printScoreBoard(playerGuesses, botGuesses);
 
             while (userTurn) {
 
