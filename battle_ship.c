@@ -109,6 +109,7 @@ int getRowInt (char rowLetter) {
         break;
 
     default:
+        return -1;
         break;
     }
 }
@@ -382,7 +383,7 @@ int isPlaceable(int x, int y, int field[10][10], int size, char direction) {
 }
 
 int coordinateIsValid (int x, int y) {
-    if (x >= 10 || x < 0 || y > 10 || y <= 0) {
+    if (x >= 10 || x < 0 || y >= 10 || y < 0) {
         return 0;
     } else {
         return 1;
@@ -617,7 +618,8 @@ int playerTurn (int playerField[10][10], int botField [10][10], int turn, int pl
             }
 
         } else {
-            printf("Coordinate is invalid");
+            puts("Coordinate is invalid");
+            sleep(2);
             flag = 1;
         }
     
@@ -638,7 +640,7 @@ int botTurn (int playerField [10][10], int botField[10][10]) {
         playerField[line][column] = 3;
         drawBothField(playerField, botField);
         
-        printf("\nBot guessed: (%d, %d)", getRowChar(line+1), column+1);
+        printf("\nBot guessed: (%c, %d)", toupper(getRowChar(line+1)), column+1);
         puts(" and hit water =D");
         botTurn = 0;
     } else if (playerField [line][column] == 2) {
@@ -646,7 +648,7 @@ int botTurn (int playerField [10][10], int botField[10][10]) {
         playerField[line][column]=1;
         drawBothField(playerField, botField);
 
-        printf("\nBot guessed: (%d, %d)", line+1, column+1);
+        printf("\nBot guessed: (%c, %d)", toupper(getRowChar(line+1)), column+1);
         puts(" and hit your ship T_T");
         botTurn = 1;
     }
