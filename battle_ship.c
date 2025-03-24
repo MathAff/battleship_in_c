@@ -2,8 +2,15 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <unistd.h>
 #include <time.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+#elif __linux__
+    #include <unistd.h>
+#elif __APPLE__
+    #include <unistd.h>
+#endif
 
 void pressEnterToContinue();
 
@@ -133,11 +140,6 @@ char *getShipName (char ship) {
 void drawField(int field [10][10]) {
     for (int x = 0; x<=10; x++){
         if (x!=0){
-            // if (x<10) {
-            //     printf("0%d ", x);    
-            // } else {
-            //     printf("%d ", x);
-            // }
             printf ("%c ", toupper(getRowChar(x)));
         } else {
             printf ("#");
@@ -352,6 +354,10 @@ int getShipQtd (char ship) {
 
 int isPlaceable(int x, int y, int field[10][10], int size, char direction) {
     int placeable = 0;
+
+    if (x >= 10 || x < 0 || y > 10 || y <= 0) {
+        return 0;
+    }
     
     for (int i=0; i<size; i++) {
 
@@ -373,6 +379,14 @@ int isPlaceable(int x, int y, int field[10][10], int size, char direction) {
     }
 
     return placeable;
+}
+
+int coordinateIsValid (int x, int y) {
+    if (x >= 10 || x < 0 || y > 10 || y <= 0) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 void placeUserShips (int field [10][10], char ship) {
@@ -555,37 +569,58 @@ void animateCoin(int height) {
 
 }
 
-int playerTurn (int playerField[10][10], int botField [10][10]) {
-    int userTurn = 1, line=0, column=0;
+int playerTurn (int playerField[10][10], int botField [10][10], int turn, int playerGuesses, int botGuesses) {
+    int userTurn = 1, line=0, column=0, flag=1;
     char lineChar;
 
-    printf("\nWhere are the enemy's ships?\n");
-    puts("Choose line (A - J)");
-    scanf(" %c", &lineChar);
-    line = getRowInt(lineChar);
-
-    puts("Choose column (01 - 10)");
-    scanf("%d", &column);
-    column--;
-
-    if (botField [line][column] == 0) {
-        botField[line][column] = 3;
-
+    while (flag) {
         clearScreen();
-        puts("You hit water T_T");
-        sleep(2);
-        clearScreen();
+        printf("Turn no%d\n\n", turn);
 
-        userTurn = 0;
-    } else if (botField[line][column] == 1 || botField [line][column] == 3) {
-        puts("You already guessed that");
-    } else {
-        botField[line][column]=1;
-        clearScreen();
-        puts("You got it right!!!");
-        sleep(2);
-        clearScreen();
-        userTurn = 1;
+        puts("It's Your Turn ");
+
+        printScoreBoard(playerGuesses, botGuesses);
+        drawBothField(playerField, botField);
+        
+        printf("\nWhere are the enemy's ships?\n");
+        puts("Choose line (A - J)");
+        scanf(" %c", &lineChar);
+        line = getRowInt(lineChar);
+    
+        puts("Choose column (01 - 10)");
+        scanf("%d", &column);
+        column--;
+
+        if (coordinateIsValid(line, column)) {
+            if (botField [line][column] == 0) {
+                botField[line][column] = 3;
+        
+                clearScreen();
+                puts("You hit water T_T");
+                sleep(2);
+                clearScreen();
+        
+                userTurn = 0;
+                flag = 0;
+            } else if (botField[line][column] == 1 || botField [line][column] == 3) {
+                puts("You already guessed that");
+                sleep(2);
+                flag = 1;
+            } else {
+                botField[line][column]=1;
+                clearScreen();
+                puts("You got it right!!!");
+                sleep(2);
+                clearScreen();
+                userTurn = 1;
+                flag = 0;
+            }
+
+        } else {
+            printf("Coordinate is invalid");
+            flag = 1;
+        }
+    
     }
 
     return userTurn;
@@ -603,7 +638,7 @@ int botTurn (int playerField [10][10], int botField[10][10]) {
         playerField[line][column] = 3;
         drawBothField(playerField, botField);
         
-        printf("\nBot guessed: (%d, %d)", line+1, column+1);
+        printf("\nBot guessed: (%d, %d)", getRowChar(line+1), column+1);
         puts(" and hit water =D");
         botTurn = 0;
     } else if (playerField [line][column] == 2) {
@@ -701,16 +736,10 @@ void main () {
 
         int gameRunning = 1, c=1;
         while (gameRunning){
-            clearScreen();
-            printf("Turn no%d\n\n", c);
 
             while (userTurn) {
-                puts("It's Your Turn ");
 
-                printScoreBoard(playerGuesses, botGuesses);
-
-                drawBothField(playerField, botField);
-                userTurn = playerTurn(playerField, botField);
+                userTurn = playerTurn(playerField, botField, c, playerGuesses, botGuesses);
                 if (userTurn) {
                     playerGuesses++;
                 }
@@ -720,11 +749,15 @@ void main () {
                     gameRunning = 0;
                     break;
                 }
+                
+                c++;
             }
     
-            while (!userTurn) {
+            while (!userTurn) {    
                 clearScreen();
-                puts("It's enemys turn\n");
+                printf("Turn no%d\n\n", c);
+                
+                puts("It's enemys Turn ");
 
                 printScoreBoard(playerGuesses, botGuesses);
 
@@ -743,8 +776,9 @@ void main () {
                     gameRunning = 0;
                     break;
                 }
+
+                c++;
             }
-            c++;
         }
 
         choice = 'n';
