@@ -354,32 +354,38 @@ int getShipQtd (char ship) {
 }
 
 int isPlaceable(int x, int y, int field[10][10], int size, char direction) {
-    int placeable = 0;
 
-    if (x >= 10 || x < 0 || y > 10 || y <= 0) {
+    if (x >= 10 || x < 0 || y >= 10 || y < 0) {
         return 0;
     }
     
     for (int i=0; i<size; i++) {
 
-        if (direction == 'h' || direction == 0) {
+        if (direction == 'h') {
 
             if (field [x] [y+i] == 2 || y+i < 0 || y+i >= 10){
+                
                 return 0;
+            
             } else {
-                placeable = 1;
+                
+                return 1;
+            
             }
-        } else if (direction == 'v'  || direction == 1) {
+        
+        } else if (direction == 'v') {
             
             if (field [x+i] [y] == 2 || x+i < 0 || x+i >=10){
+        
                 return 0;
+        
             } else {
-                placeable = 1;
+        
+                return 1;
+        
             }
         }
     }
-
-    return placeable;
 }
 
 int coordinateIsValid (int x, int y) {
@@ -395,18 +401,18 @@ void placeUserShips (int field [10][10], char ship) {
     char direction, *shipName = getShipName(ship), lineChar;
 
     while (shipsPlaced < getShipQtd(ship)){
-        printf("Place the %s no%d. They occupie %d squares\n", shipName, shipsPlaced+1, getShipSize(ship));
+        printf("Place the %s no%d. They occupie %d squares\n\n", shipName, shipsPlaced+1, getShipSize(ship));
         drawField(field);
-        puts("Choose the line (A - J): ");
+        puts("\nChoose the line (A - J): ");
         scanf(" %c", &lineChar);
         line = getRowInt(lineChar);
 
-        puts ("Choose the column (01 - 10): ");
+        puts ("\nChoose the column (01 - 10): ");
         scanf("%d", &column);
         getchar();
         column = column -1;
 
-        puts("Which direction does the ship go (V / H)?");
+        puts("\nWhich direction does the ship go (V / H)?");
         scanf(" %c", &direction);
         direction = tolower(direction);
 
@@ -501,17 +507,32 @@ void printScoreBoard(int playerScore, int botScore) {
     printf (" |\n\n\033[0m");
 }
 
-void printBotThinking () {
-    int frameCount = 4;
-
-    printf ("\033[?25l\033[1m"); // unable cursor
-
-    printf ("Bot Is Guessing Where Are Your Ships...");
-    sleep(2);
-
-    clearScreen();
-
-    printf("\033[?25h\n"); // enable cursor
+void printBigShip () {
+    printf("      .-\"\"-.\n");
+    printf("   ) (     )\n");
+    printf("  (   )   (\n");
+    printf("     /     )\n");
+    printf("    (_    _)                      _,-.__\n");
+    printf("      (_  )_                     |_.-._/\n");
+    printf("       (    )                    |_--..\\\n");
+    printf("        (__)                     |__--_/\n");
+    printf("     |''   ``\\                   |\n");
+    printf("     |        \\                  |      \n");
+    printf("     |         \\  ,,,---===?==\\  |  \n");
+    printf("   ___,,,,,---==\"\"\\        |H  \\ | \n");
+    printf("           _   _   \\   ___,|H,,---==\"\"\"\"\"\"\",\n");
+    printf("    o  O  (_) (_)   \\ /          _       //\n");
+    printf("                     /         _(+)_    //\n");
+    printf("      \\__,,,,,,---==\"   \\      \\\\|//   //\n");
+    printf("--''''\"                         ===   //\n");
+    printf("                                     //\n");
+    printf("                                    //__________________________\n");
+    printf("   \\    \\    \\     \\               //~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("                         _____    //  ~~~   .-\"\"-.~~~~~~  .-\"\"-.\n");
+    printf("      .-\"\"-.           ///==---   //-._ ..-'      -.__..-'\n");
+    printf("            `-.__..-' =====\\\\\\\\\\\\ //  .---\\.\n");
+    printf("                      ~~~~~~~~~~~~, _',--/_.\\  .-\"\"-.\n");
+    printf("                            .-\"\"-.___` --  \\|         -.__..-\n");
 }
 
 void printYouLose () {
@@ -553,7 +574,7 @@ void animateCoin(int height) {
             printf("\n");
         }
         printf("%s\n", frames[(height - i) % frameCount]);
-        usleep(20000);
+        sleep(2);
     }
 
     for (int i = 1; i <= height; i++) {
@@ -562,7 +583,7 @@ void animateCoin(int height) {
             printf("\n");
         }
         printf("%s\n", frames[(height - i) % frameCount]);
-        usleep(200000);
+        sleep(2);
     }
 
     printf("\033[?25h"); // enable cursor
@@ -584,11 +605,11 @@ int playerTurn (int playerField[10][10], int botField [10][10], int turn, int pl
         drawBothField(playerField, botField);
         
         printf("\nWhere are the enemy's ships?\n");
-        puts("Choose line (A - J)");
+        puts("\nChoose line (A - J)");
         scanf(" %c", &lineChar);
         line = getRowInt(lineChar);
     
-        puts("Choose column (01 - 10)");
+        puts("\nChoose column (01 - 10)");
         scanf("%d", &column);
         column--;
 
@@ -644,7 +665,6 @@ int botTurn (int playerField [10][10], int botField[10][10]) {
         puts(" and hit water =D");
         botTurn = 0;
     } else if (playerField [line][column] == 2) {
-
         playerField[line][column]=1;
         drawBothField(playerField, botField);
 
@@ -675,64 +695,60 @@ void main () {
     initField(playerField);
     initField(botField);
 
-    placeBotShips(playerField);
     placeBotShips(botField);
 
     clearScreen();
 
-    //puts("=== Welcome to Battleship ===");
-//
-    // puts("\nIn this game you and your opponent have to place some ships in the ocean, they're:");
-    // puts("\n\t|  qt  |      type     |  size  |");
-    // puts("\n\t|  05  |   destroyers  |   02   |");
-    // puts("\t|  04  |   submarines  |   03   |");
-    // puts("\t|  03  |     cruiser   |   03   |");
-    // puts("\t|  02  |   battleship  |   04   |");
-    // puts("\t|  01  |     carrier   |   05   |");
+    puts("======= Welcome to Battleship =======\n");
 
-    //printf("\n\nStart game? (Y/N) ");
-    //scanf("%c", &choice);
-    //choice = tolower(choice);
+    printBigShip();
 
-    //while (choice == 'y') 
-        //clearScreen();
-    //
-        //puts("Guess where your enemy's ships are. Choose wisely");
-        //puts("The game has begun");
-//
-        //sleep(5);
+    puts("\nIn this game you and your opponent have to place some ships in the ocean, they're:");
+    puts("\n\t|  qt  |      type     |  size  |");
+    puts("\n\t|  05  |   destroyers  |   02   |");
+    puts("\t|  04  |   submarines  |   03   |");
+    puts("\t|  03  |     cruiser   |   03   |");
+    puts("\t|  02  |   battleship  |   04   |");
+    puts("\t|  01  |     carrier   |   05   |");
 
-        // placeUserShips(playerField, 'd');
-        // placeUserShips(playerField, 's');
-        // placeUserShips(playerField, 'r');
-        // placeUserShips(playerField, 'b');
-        // placeUserShips(playerField, 'a');
+    printf("\n\nStart game? (Y/N) ");
+    scanf("%c", &choice);
+    choice = tolower(choice);
+
+    while (choice == 'y') {
+        clearScreen();
+
+        placeUserShips(playerField, 'd');
+        placeUserShips(playerField, 's');
+        placeUserShips(playerField, 'r');
+        placeUserShips(playerField, 'b');
+        placeUserShips(playerField, 'a');
         
-        // puts("Who goes first? Fliping a coin...");
-        // sleep(2.5);
-        // clearScreen();
+        puts("Who goes first? Fliping a coin...");
+        sleep(2.5);
+        clearScreen();
 
-        // animateCoin(5);
+        animateCoin(5);
         
         int flipCoin = rand() % 2;
         userTurn = flipCoin == 0 ? 0 : 1;
-        // userTurn = 0;
+        userTurn = 0;
 
-        // switch (userTurn)
-        // {
-        // case 0:
-        //     printf("  Bot goes first!!\n");
-        //     break;
+        switch (userTurn)
+        {
+        case 0:
+            printf("  Bot goes first!!\n");
+            break;
         
-        // case 1:
-        //     printf("  You go first!!\n");
-        //     break;
+        case 1:
+            printf("  You go first!!\n");
+            break;
         
-        // default:
-        //     break;
-        // }
+        default:
+            break;
+        }
 
-        // sleep(2);
+        sleep(2);
 
         clearScreen();
 
@@ -784,5 +800,7 @@ void main () {
         }
 
         choice = 'n';
-//    }
+   }
+   clearScreen();
+   puts ("Thanks for Playing");
 }
